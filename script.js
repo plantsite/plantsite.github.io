@@ -181,6 +181,7 @@ function handleScroll() {
 
         loadingMsg.style.display = "block";
         currentPage++;
+        console.log("Current page: " + currentPage);
 
         if (searchInput.value.trim() === "") {
             console.log("Appending data");
@@ -293,19 +294,30 @@ function searchHandler() {
 
         if (searchResults.length > 0) {
             appendSearchResults();
-        } else {
+        }
+        else {
             var noResultsElement = document.createElement("div");
             noResultsElement.className = "no-results";
             noResultsElement.textContent = "No results found.";
             searchContainer.appendChild(noResultsElement);
         }
+
     }
 }
 
 function appendSearchResults() {
-    var startIndex = (currentPage - 1) * itemsPerPage;
-    var endIndex = startIndex + itemsPerPage;
-    var speciesCount = 0;
+
+
+    if (searchResults.length > calculateItemsPerPage()*5) {
+        var startIndex = (currentPage - 1) * itemsPerPage;
+        var endIndex = startIndex + itemsPerPage;
+        var speciesCount = 0;
+    } else {
+        var startIndex = (currentPage - 1) * itemsPerPage;
+        var endIndex = searchResults.length;
+        var speciesCount = 0;
+    }
+
 
     for (var i = 0; i < searchResults.length; i++) {
         if (speciesCount >= startIndex && speciesCount < endIndex) {
