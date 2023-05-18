@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.species-card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.species-card img {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.species-card h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.species-card p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+#loadingMsg {
+    display: none;
+    text-align: center;
+}
+
+.species-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.species-item:hover {
+    background-color: #f0f0f0;
+}
+
+.species-image {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.family-item {
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 24px;
+    transition: background-color 0.2s;
+}
+.genus-item {
+    border-radius: 5px;
+    margin-bottom: 7.5px;
+    font-size: 20px;
+    transition: background-color 0.2s;
+}
+
+.family-item:hover,
+.genus-item:hover {
+    background-color: #f0f0f0;
+}
+
+.species-details {
+    display: none;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.species-item.open .species-details {
+    display: block;
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+.search-input {
+    width: 200px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-button {
+    margin-left: 10px;
+    padding: 8px 16px;
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.search-button:hover {
+    background-color: #45a049;
+}
+
+.search-button:active {
+    background-color: #3c903c;
+}
+
+.search-results-container {
+    margin-top: 20px;
+}
+
+.no-results {
+    font-style: italic;
+    color: #888;
+}
