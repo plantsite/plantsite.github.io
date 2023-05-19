@@ -17,8 +17,9 @@ function createFamilyElement(family) {
     familyElement.className = "family-item";
     familyElement.textContent = family;
     familyElement.addEventListener("click", function () {
-        toggleVisibility(this);
+        redirectToWikipedia(family);
     });
+
     return familyElement;
 }
 
@@ -27,7 +28,7 @@ function createGenusElement(genus) {
     genusElement.className = "genus-item";
     genusElement.textContent = genus;
     genusElement.addEventListener("click", function () {
-        toggleVisibility(this);
+        redirectToWikipedia(genus);
     });
     return genusElement;
 }
@@ -52,15 +53,57 @@ function createSpeciesElement(name, imageUrl) {
     nameElement.textContent = name;
     speciesElement.appendChild(nameElement);
 
-    speciesElement.addEventListener("click", function () {
-        toggleVisibility(this);
+    speciesElement.addEventListener("click", function() {
+        redirectToSpeciesOrGenus(name, name.split(" ")[0]);
     });
 
     return speciesElement;
 }
 
-function toggleVisibility(element) {
-    element.classList.toggle("open");
+function redirectToSpeciesOrGenus(speciesName, genus) {
+    var wikipediaApiUrl = "https://en.wikipedia.org/w/api.php";
+    var speciesUrl = "https://en.wikipedia.org/wiki/" + encodeURIComponent(speciesName);
+    var genusUrl = "https://en.wikipedia.org/wiki/" + encodeURIComponent(genus);
+
+    var urlToOpen = speciesUrl;
+
+    // Function to check if a Wikipedia page exists
+    function pageExists(pageUrl) {
+        var apiUrl = wikipediaApiUrl + "?format=json&action=query&prop=extracts&exintro&explaintext&titles=" + encodeURIComponent(pageUrl) + "&origin=*&redirects=true";
+        return fetch(apiUrl)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                var pages = data.query.pages;
+                var pageId = Object.keys(pages)[0];
+                console.log("Page ID:", pageId);
+                return pageId !== "-1";
+            })
+            .catch(function(error) {
+                console.error("Error:", error);
+                return false;
+            });
+    }
+
+    // Check if the species page exists
+    pageExists(speciesName)
+        .then(function(exists) {
+            if (!exists) {
+                urlToOpen = genusUrl;
+            }
+
+            // Open the Wikipedia page in a new tab
+            window.open(urlToOpen, "_blank");
+        })
+        .catch(function(error) {
+            console.error("Error:", error);
+        });
+}
+
+function redirectToWikipedia(keyword) {
+    var wikipediaUrl = "https://en.wikipedia.org/wiki/" + encodeURIComponent(keyword);
+    window.open(wikipediaUrl, "_blank");
 }
 
 function fetchData(callback) {
@@ -306,16 +349,14 @@ function searchHandler() {
 }
 
 function appendSearchResults() {
-
+    var startIndex = (currentPage - 1) * itemsPerPage;
+    var endIndex;
+    var speciesCount = 0;
 
     if (searchResults.length > calculateItemsPerPage()*5) {
-        var startIndex = (currentPage - 1) * itemsPerPage;
-        var endIndex = startIndex + itemsPerPage;
-        var speciesCount = 0;
+        endIndex = startIndex + itemsPerPage;
     } else {
-        var startIndex = (currentPage - 1) * itemsPerPage;
-        var endIndex = searchResults.length;
-        var speciesCount = 0;
+        endIndex = searchResults.length;
     }
 
 
