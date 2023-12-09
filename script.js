@@ -8,7 +8,7 @@ var displayedSpeciesNames = [];
 
 function calculateItemsPerPage() {
     var windowHeight = window.innerHeight;
-    var itemHeight = 80; // Adjust this value based on your item height
+    var itemHeight = 80; 
     return Math.ceil(windowHeight / itemHeight);
 }
 
@@ -219,12 +219,17 @@ function sortData(data) {
 }
 
 function handleScroll() {
-    if ((window.innerHeight + window.scrollY >= document.documentElement.offsetHeight)) {
+    console.log("Scrolling");
+    console.log("Window height: " + window.innerHeight);
+    console.log("Scroll Y: " + window.scrollY);
+    console.log("Document height: " + document.documentElement.offsetHeight);
+    if ((window.innerHeight + window.scrollY >= document.documentElement.offsetHeight-1)) {
         console.log("Reached the bottom of the page");
 
         loadingMsg.style.display = "block";
         currentPage++;
         console.log("Current page: " + currentPage);
+
 
         if (searchInput.value.trim() === "") {
             console.log("Appending data");
@@ -233,6 +238,7 @@ function handleScroll() {
             console.log("Performing search");
             performScrollSearch();
         }
+
     }
 }
 
@@ -257,33 +263,74 @@ function performScrollSearch() {
                     speciesImage = speciesData.image_url;
                 }
 
-                if (speciesName.toLowerCase().indexOf(searchTerm) !== -1 && !displayedSpeciesNames.includes(speciesName)) {
-                    searchResults.push(speciesData);
-                    displayedSpeciesNames.push(speciesName);
-                }
+                var relevance = calculateRelevance(speciesName, searchTerm);
 
-                if (searchResults.length === maxResults) {
-                    displaySearchResults(searchResults);
-                    return;
+                if (relevance > 0 && !displayedSpeciesNames.includes(speciesName)) {
+                    searchResults.push({
+                        data: speciesData,
+                        relevance: relevance
+                    });
+
+                    // Sort searchResults by relevance
+                    searchResults.sort(function (a, b) {
+                        return b.relevance - a.relevance;
+                    });
+
+                    // Truncate results if exceeds maxResults
+                    searchResults = searchResults.slice(0, maxResults);
                 }
             }
         }
     }
 
-    displaySearchResults(searchResults);
+    displaySearchResults(searchResults.map(result => result.data));
 }
+
+function calculateRelevance(speciesName, searchTerm) {
+    // You can customize this function based on your relevance criteria
+    // For example, you can assign different weights to matches in name, genus, etc.
+    var relevance = 0;
+
+    if (speciesName.toLowerCase().includes(searchTerm)) {
+        relevance += 3; // Name match has higher relevance
+    }
+
+    // Add additional relevance criteria as needed
+
+    return relevance;
+}
+
 
 function displaySearchResults(results) {
     var searchContainer = document.createElement("div");
     searchContainer.className = "search-results-container";
     dataContainer.appendChild(searchContainer);
+
     if (results.length > 0) {
+        var currentFamily, currentGenus;
+
         for (var j = 0; j < results.length; j++) {
             var searchResult = results[j];
+
+            // Check if the family has changed
+            if (currentFamily !== searchResult.family) {
+                currentFamily = searchResult.family;
+                var familyHeader = createFamilyElement(currentFamily);
+                searchContainer.appendChild(familyHeader);
+            }
+
+            // Check if the genus has changed
+            if (currentGenus !== searchResult.genus) {
+                currentGenus = searchResult.genus;
+                var genusHeader = createGenusElement(currentGenus);
+                searchContainer.appendChild(genusHeader);
+            }
+
             var searchResultElement = createSpeciesElement(
                 searchResult.name || searchResult,
                 searchResult.image_url || "no-image.png"
             );
+
             searchContainer.appendChild(searchResultElement);
         }
     } else {
@@ -293,6 +340,7 @@ function displaySearchResults(results) {
         searchContainer.appendChild(noResultsElement);
     }
 }
+
 
 function searchHandler() {
     displayedSpeciesNames = [];
