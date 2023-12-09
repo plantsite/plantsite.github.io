@@ -1,14 +1,13 @@
-// JavaScript code
 var currentPage = 1;
 var itemsPerPage = calculateItemsPerPage() * 5;
 var dataContainer = document.getElementById("dataContainer");
 var loadingMsg = document.getElementById("loadingMsg");
-var sortedData; // Global variable to store the sorted data
+var sortedData; 
 var displayedSpeciesNames = [];
 
 function calculateItemsPerPage() {
     var windowHeight = window.innerHeight;
-    var itemHeight = 80; // Adjust this value based on your item height
+    var itemHeight = 80; 
     return Math.ceil(windowHeight / itemHeight);
 }
 
@@ -67,7 +66,6 @@ function redirectToSpeciesOrGenus(speciesName, genus) {
 
     var urlToOpen = speciesUrl;
 
-    // Function to check if a Wikipedia page exists
     function pageExists(pageUrl) {
         var apiUrl = wikipediaApiUrl + "?format=json&action=query&prop=extracts&exintro&explaintext&titles=" + encodeURIComponent(pageUrl) + "&origin=*&redirects=true";
         return fetch(apiUrl)
@@ -86,14 +84,12 @@ function redirectToSpeciesOrGenus(speciesName, genus) {
             });
     }
 
-    // Check if the species page exists
     pageExists(speciesName)
         .then(function(exists) {
             if (!exists) {
                 urlToOpen = genusUrl;
             }
 
-            // Open the Wikipedia page in a new tab
             window.open(urlToOpen, "_blank");
         })
         .catch(function(error) {
@@ -137,7 +133,6 @@ function appendData() {
             null
         ).singleNodeValue;
 
-        // only add family if it doesn't exist
         if (matchingElement === null) {
             dataContainer.appendChild(familyElement);
         }
@@ -154,7 +149,6 @@ function appendData() {
                 null
             ).singleNodeValue;
 
-            // only add genus if it doesn't exist
             if (matchingElement === null) {
                 dataContainer.appendChild(genusElement);
             }
@@ -182,7 +176,6 @@ function appendData() {
                 }
                 speciesCount++;
 
-                // Check if reached the end
                 if (speciesCount >= endIndex) {
                     return;
                 }
@@ -190,7 +183,6 @@ function appendData() {
         }
     }
 
-    // Check if there is more data to load
     if (speciesCount <= endIndex) {
         window.removeEventListener("scroll", handleScroll);
     } else {
@@ -201,13 +193,11 @@ function appendData() {
 function sortData(data) {
     var sortedData = {};
 
-    // Sort by family
     var sortedFamilies = Object.keys(data["Plantae"]).sort();
     for (var i = 0; i < sortedFamilies.length; i++) {
         var family = sortedFamilies[i];
         sortedData[family] = {};
 
-        // Sort by genus within each family
         var sortedGenera = Object.keys(data["Plantae"][family]).sort();
         for (var j = 0; j < sortedGenera.length; j++) {
             var genus = sortedGenera[j];
@@ -230,7 +220,6 @@ function handleScroll() {
         currentPage++;
         console.log("Current page: " + currentPage);
 
-
         if (searchInput.value.trim() === "") {
             console.log("Appending data");
             appendData();
@@ -246,7 +235,7 @@ function performScrollSearch() {
     var searchTerm = searchInput.value.trim().toLowerCase();
 
     var searchResults = [];
-    var maxResults = calculateItemsPerPage() * 5; // Specify the maximum number of search results to display
+    var maxResults = calculateItemsPerPage() * 5; 
 
     for (var family in sortedData) {
         for (var genus in sortedData[family]) {
@@ -271,12 +260,10 @@ function performScrollSearch() {
                         relevance: relevance
                     });
 
-                    // Sort searchResults by relevance
                     searchResults.sort(function (a, b) {
                         return b.relevance - a.relevance;
                     });
 
-                    // Truncate results if exceeds maxResults
                     searchResults = searchResults.slice(0, maxResults);
                 }
             }
@@ -286,11 +273,9 @@ function performScrollSearch() {
     displaySearchResults(searchResults.map(result => result.data));
 }
 
-
 function rollDice() {
     var totalPlants = 0;
 
-    // Calculate the total number of plants
     for (var family in sortedData) {
         for (var genus in sortedData[family]) {
             var species = sortedData[family][genus];
@@ -298,13 +283,11 @@ function rollDice() {
         }
     }
 
-    // Generate a random index to select a random plant
     var randomIndex = Math.floor(Math.random() * totalPlants);
 
     var currentPlantIndex = 0;
     var selectedPlant;
 
-    // Iterate through the data to find the randomly selected plant
     for (var family in sortedData) {
         for (var genus in sortedData[family]) {
             var species = sortedData[family][genus];
@@ -324,22 +307,18 @@ function rollDice() {
         }
     }
 
-    // Display information about the selected plant, including the Wikipedia link
     if (selectedPlant) {
         var plantName = typeof selectedPlant === "string" ? selectedPlant : selectedPlant.name;
         var plantImageUrl = typeof selectedPlant === "string" ? "no-image.png" : selectedPlant.image_url;
 
-        // Construct Wikipedia link
         var wikipediaLink = "https://en.wikipedia.org/wiki/" + encodeURIComponent(plantName);
 
-        // Check if the Wikipedia page exists
         pageExists(wikipediaLink)
             .then(function (exists) {
-                // Customize this part to display the plant information as you like
+
                 var message = "You rolled a random plant:\n\n" +
                     "Name: " + plantName + "\n";
 
-                // Include image URL in the message only if it is not "no-image.png"
                 if (plantImageUrl !== "no-image.png") {
                     message += "Image URL: https:" + plantImageUrl + "\n";
                 }
@@ -347,10 +326,8 @@ function rollDice() {
                 if (exists) {
                     message += "Wikipedia Link: " + wikipediaLink;
 
-                    // Display information using an alert
                     alert(message);
 
-                    // Open the Wikipedia link in a new tab
                     window.open(wikipediaLink, "_blank");
                 }
 
@@ -363,7 +340,6 @@ function rollDice() {
         alert("No plants found.");
     }
 }
-
 
 function pageExists(pageUrl) {
     var apiUrl = "https://en.wikipedia.org/w/api.php?action=query&titles=" + encodeURIComponent(pageUrl) + "&format=json&origin=*";
@@ -383,22 +359,16 @@ function pageExists(pageUrl) {
         });
 }
 
-
-
 function calculateRelevance(speciesName, searchTerm) {
-    // You can customize this function based on your relevance criteria
-    // For example, you can assign different weights to matches in name, genus, etc.
+
     var relevance = 0;
 
     if (speciesName.toLowerCase().includes(searchTerm)) {
-        relevance += 3; // Name match has higher relevance
+        relevance += 3; 
     }
-
-    // Add additional relevance criteria as needed
 
     return relevance;
 }
-
 
 function displaySearchResults(results) {
     var searchContainer = document.createElement("div");
@@ -411,14 +381,12 @@ function displaySearchResults(results) {
         for (var j = 0; j < results.length; j++) {
             var searchResult = results[j];
 
-            // Check if the family has changed
             if (currentFamily !== searchResult.family) {
                 currentFamily = searchResult.family;
                 var familyHeader = createFamilyElement(currentFamily);
                 searchContainer.appendChild(familyHeader);
             }
 
-            // Check if the genus has changed
             if (currentGenus !== searchResult.genus) {
                 currentGenus = searchResult.genus;
                 var genusHeader = createGenusElement(currentGenus);
@@ -440,18 +408,17 @@ function displaySearchResults(results) {
     }
 }
 
-
 function searchHandler() {
     displayedSpeciesNames = [];
     var searchTerm = searchInput.value.trim().toLowerCase();
     if (searchTerm === "") {
-        // Clear search
+
         dataContainer.innerHTML = "";
         currentPage = 1;
         searchResults = [];
         appendData();
     } else {
-        // Perform search
+
         searchResults = [];
 
         for (var family in sortedData) {
@@ -476,7 +443,6 @@ function searchHandler() {
             }
         }
 
-        // Display search results
         dataContainer.innerHTML = "";
         searchContainer = document.createElement("div");
         searchContainer.className = "search-results-container";
@@ -506,7 +472,6 @@ function appendSearchResults() {
         endIndex = searchResults.length;
     }
 
-
     for (var i = 0; i < searchResults.length; i++) {
         if (speciesCount >= startIndex && speciesCount < endIndex) {
             var searchResult = searchResults[i];
@@ -518,14 +483,12 @@ function appendSearchResults() {
         }
         speciesCount++;
 
-        // Check if reached the end
         if (speciesCount >= endIndex) {
             loadingMsg.style.display = "none";
             return;
         }
     }
 
-    // Check if there is more data to load
     if (speciesCount <= endIndex) {
         window.removeEventListener("scroll", handleScroll);
     } else {
@@ -533,7 +496,6 @@ function appendSearchResults() {
     }
 }
 
-// Event listeners
 searchButton.addEventListener("click", searchHandler);
 searchInput.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
@@ -541,7 +503,6 @@ searchInput.addEventListener("keydown", function (event) {
     }
 });
 
-// Initial data loading
 function loadData() {
     fetchData(function () {
         appendData();
