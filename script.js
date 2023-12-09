@@ -8,7 +8,7 @@ var displayedSpeciesNames = [];
 
 function calculateItemsPerPage() {
     var windowHeight = window.innerHeight;
-    var itemHeight = 80; 
+    var itemHeight = 80; // Adjust this value based on your item height
     return Math.ceil(windowHeight / itemHeight);
 }
 
@@ -285,6 +285,105 @@ function performScrollSearch() {
 
     displaySearchResults(searchResults.map(result => result.data));
 }
+
+
+function rollDice() {
+    var totalPlants = 0;
+
+    // Calculate the total number of plants
+    for (var family in sortedData) {
+        for (var genus in sortedData[family]) {
+            var species = sortedData[family][genus];
+            totalPlants += species.length;
+        }
+    }
+
+    // Generate a random index to select a random plant
+    var randomIndex = Math.floor(Math.random() * totalPlants);
+
+    var currentPlantIndex = 0;
+    var selectedPlant;
+
+    // Iterate through the data to find the randomly selected plant
+    for (var family in sortedData) {
+        for (var genus in sortedData[family]) {
+            var species = sortedData[family][genus];
+            for (var i = 0; i < species.length; i++) {
+                if (currentPlantIndex === randomIndex) {
+                    selectedPlant = species[i];
+                    break;
+                }
+                currentPlantIndex++;
+            }
+            if (selectedPlant) {
+                break;
+            }
+        }
+        if (selectedPlant) {
+            break;
+        }
+    }
+
+    // Display information about the selected plant, including the Wikipedia link
+    if (selectedPlant) {
+        var plantName = typeof selectedPlant === "string" ? selectedPlant : selectedPlant.name;
+        var plantImageUrl = typeof selectedPlant === "string" ? "no-image.png" : selectedPlant.image_url;
+
+        // Construct Wikipedia link
+        var wikipediaLink = "https://en.wikipedia.org/wiki/" + encodeURIComponent(plantName);
+
+        // Check if the Wikipedia page exists
+        pageExists(wikipediaLink)
+            .then(function (exists) {
+                // Customize this part to display the plant information as you like
+                var message = "You rolled a random plant:\n\n" +
+                    "Name: " + plantName + "\n";
+
+                // Include image URL in the message only if it is not "no-image.png"
+                if (plantImageUrl !== "no-image.png") {
+                    message += "Image URL: https:" + plantImageUrl + "\n";
+                }
+
+                if (exists) {
+                    message += "Wikipedia Link: " + wikipediaLink;
+
+                    // Display information using an alert
+                    alert(message);
+
+                    // Open the Wikipedia link in a new tab
+                    window.open(wikipediaLink, "_blank");
+                }
+
+                alert(message);
+            })
+            .catch(function (error) {
+                console.error("Error:", error);
+            });
+    } else {
+        alert("No plants found.");
+    }
+}
+
+
+function pageExists(pageUrl) {
+    var apiUrl = "https://en.wikipedia.org/w/api.php?action=query&titles=" + encodeURIComponent(pageUrl) + "&format=json&origin=*";
+
+    return fetch(apiUrl)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (data) {
+            var pages = data.query.pages;
+            var pageId = Object.keys(pages)[0];
+            return pageId !== "-1";
+        })
+        .catch(function (error) {
+            console.error("Error:", error);
+            return false;
+        });
+}
+
+
 
 function calculateRelevance(speciesName, searchTerm) {
     // You can customize this function based on your relevance criteria
